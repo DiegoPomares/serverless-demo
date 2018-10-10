@@ -1,0 +1,1 @@
+s3_bucket_artifacts: {{ var.s3_bucket_artifacts | default("dp-lambda-artifacts-dev") }}

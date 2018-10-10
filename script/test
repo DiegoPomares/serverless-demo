@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+
+cd "$(dirname "$(readlink -f "$0")")/.."
+
+./script/bootstrap
+
+for dir in $(echo ./src/*/); do
+    make -C $dir test
+done

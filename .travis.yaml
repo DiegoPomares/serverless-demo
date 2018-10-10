@@ -1,0 +1,18 @@
+language: generic
+
+env:
+  global:
+    # AWS_ACCESS_KEY_ID
+    - secure: "BLkx1yRw6p4wRjcEp5+uCFn5PvFHYFGzxmAQD/dy7t0q0uScLmebJ3Cr1+IBcE0b3KfSI4FtLkdIcF5TPQVXDrsZ95uRf82mTt1zeBev2Gnsy1h3MCD2Eenet21Z9Y7zYDXQhtJjA2ubY+qJhPnfvdpWTTpuRZOMA5N/yhD2MwC9Azz9pQoopz8MQgRyz9wl+fGZtkOeDZz5/jOhbUmgA4vrrr1YVoqJ0rKsuQrqRSsYUey0mPVPLe+uri9wkYG0ejZhoTQHLof3blFuR/DRb2phLUMWFqB2d44x1ZwKhEPuJyOAVmp2VkFG9p+2mHKe3O/LxIsB9GjAGSPJDjwivBYtUDmoYA+3R/1bwSNkgnujFQok+BbqnKrYDChUz1DYZgffOeZ+aqgQdRTZB3QbwP0sjMT+SwaPjhFiXZT7muyWzuN31xDAbV6Q9LHhQWXkzdsDg9iL4bHYjz1kR1qm8ku3RsSEEsPUWkxPloW88sHy6kaHhaace6hp2fqNh6hjyoRa2E2MZiP4zpjAi7/q7zQqz3HUg99aEFaBAxhP7nl8yFITlEOxHxU16piEzFauZGqmFK9VGcN89YRON2VxJcPl15nxY/89yxtiqzFbv44snpLwG9ubP5yUVn98CJo5deur9uCd+8E0X/PCxnKA8n/iH74xUyAKwWgpscPOJrw="
+    # AWS_SECRET_ACCESS_KEY
+    - secure: "JY9cLdGPAAvtCSTWle1wrS41iGv2h10gRZU6MH7K42DMRLp+qsGE1cGCsmMzpcGVodOsYYYEH8eBsHoxo8cXYbyDO1cUerYpmgTrb11fxA1fBKZUSBm16HFdFU9mZdm7yAX0kRG9O74KBjaeyTMxQxLaf2gHCLMaVdua9GkXubfJjjr/8fvjp5rDY5pBVqRHqmr0A9YGmV5uc+P3aA8+X1B3+d0bWCjalWTdfJKHkSLq5iPXEfLYVj+CvrCS9lmB1AMFH6KhRKvlNZV7i20PKpFGgb9NubX5SYtafFi25cTjTnBkNlcHi15HdAMGqoP2TtXupCHwP/SxV3cQotfTs+wGJez/F2gvKL86puVFIVTaNmd0smmEh9fsPQNgwHbb/9X30vy1buj1TFwW8nmIMRaH/jN/gw8D466Lnio5YUEAMy+uQOzboWesXirCzRX4hHkgX+UVChGCVCpB9Y6mwsFe5gPKBqX+42aBjKbahqmobD4tK2Zhyu8qwaaWRlDhl4W8Hm+7hxsYhvcwkdtHpHbYYqSJ6X6KFpb0qq0LtqYsYc9r5yqI2elipRxZUH1UCxXDf5PF6doo/hEdUtB/8gaTOHE1TddYCYUNt/BLAyF2ZfSA0B+YR4VYFyVWR6oPZHeDoPQCkr/y4S/udgdeHxH7dT642Tg9LEDtVAWfW98="
+
+    script:
+  - ./script/test
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: ./script/deploy
+    on:
+      branch: first_commit
