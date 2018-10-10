@@ -1,0 +1,13 @@
+#!/bin/bash
+
+ENVIRONMENT=${1:-dev}
+
+set -e
+
+
+cd "$(dirname "$(readlink -f "$0")")/.."
+
+./script/bootstrap
+PY_DIR=".venv/bin"
+
+${PY_DIR}/sceptre delete-env "$ENVIRONMENT"

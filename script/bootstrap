@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -e
+
+
+cd "$(dirname "$(readlink -f "$0")")/.."
+
+if [ "$CI" == "true" ] && [ -z "$AWS_ACCESS_KEY_ID" -o -z "$AWS_SECRET_ACCESS_KEY" ]; then
+	echo "Error: AWS credentials must be passed with AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables in a CI environment."
+	exit 1
+fi
+
+# Bootstrap only when necessary, otherwise activate the virtualenv
+if [ -f .bootstrapped -a "$1" != "--force" ]; then
+    . .venv/bin/activate
+
+else
+    # Remove environments
+    rm -rf .venvpython .venv
+
+    # Setup test environment for Python lambdas
+    virtualenv --prompt "(${PWD##*/}-venvpython) " .venvpython
+    . .venvpython/bin/activate
+    pip install --upgrade pip setuptools wheel virtualenv
+    pip install --requirement dependencies/test_requirements.txt
+
+    # Setup Sceptre environment
+    virtualenv --prompt "(${PWD##*/}-venv) " .venv
+    . .venv/bin/activate
+    pip install --upgrade pip setuptools wheel virtualenv
+    pip install --requirement dependencies/requirements.txt
+
+    touch .bootstrapped
+
+fi

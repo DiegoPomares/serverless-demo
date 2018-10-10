@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -e
+
+
+cd "$(dirname "$(readlink -f "$0")")/.."
+
+rm -rf .venv* .bootstrapped
+
+for dir in $(echo ./src/*/); do
+    make -C $dir clean
+done
+
+find . -type d -name "__pycache__" -exec rm -rf "{}" +

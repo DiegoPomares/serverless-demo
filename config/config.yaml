@@ -1,0 +1,2 @@
+project_code: serverless
+region: {{ var.region | default("eu-west-2") }}

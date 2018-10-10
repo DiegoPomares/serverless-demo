@@ -1,0 +1,20 @@
+template_path: templates/s3_bucket_artifacts.yaml
+
+hooks:
+  before_delete:
+    # CloudFormation can't delete non-empty S3 buckets
+    - !cmd echo "Removing versioned objects from S3 bucket {{ environment_config.s3_bucket_artifacts }}:"
+    - !cmd >
+      aws s3api list-object-versions
+      --bucket {{ environment_config.s3_bucket_artifacts }}
+      --query "[Versions[*].[Key,VersionId],DeleteMarkers[*].[Key,VersionId]]"
+      --output text |
+      awk -F '\t' "!/^None/ {print \"
+      aws s3api delete-object
+      --bucket '{{ environment_config.s3_bucket_artifacts }}'
+      --key '\" \$1 \"'
+      --version-id '\" \$2 \"'\"
+      }" | bash
+
+parameters:
+  ArtifactsBucketName: {{ environment_config.s3_bucket_artifacts }}

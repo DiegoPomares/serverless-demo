@@ -1,0 +1,4 @@
+template_path: templates/api_gateway.py
+
+parameters:
+  HelloLambdaURI: !stack_output lambda-functions::HelloLambdaURI

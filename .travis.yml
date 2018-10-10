@@ -1,0 +1,23 @@
+language: python
+
+python:
+  - '3.6'
+
+install: true
+
+env:
+  global:
+    # AWS_ACCESS_KEY_ID
+    - secure: "mOULooD0uCqov+8mOkioH8zWO1Df/ACj9eE3VXjM5tNiJo+EnbGt5o7l+66Z1BhZ7Lg0nFcKtbVPWdvVxcPyKiBt9QvYSOJwXaV43Vf2Eplo8ksYKRpt8vjY0xESIYzBZueb+TheFjECYVvTKR/VuEUTJKD249kduRE2ncqnU+X1/cFKEIy1BQxmGyYoxj91btA6wsnxANJqgA1HowpNoVgL7c/PdbO+ZaMJV2KSn3gRulxEw8RK9bnzzx6kBTQOsq/Q/Rffaam4CGCnkHMOXu0DDtyqZVEMG6nMd+q+eSSMEBlNaKn/mD+Z1EZBdWlKIfKOFOWZyKnwGdpeHoBA5mdQtkZMOVjyJRc3iSqZLOTfTONFCLAvqY4ipD+AS+PScKB4FzQRy7Lg7slQU4nL4JaD56W4LsPS95X1hVaYujWswblp/VTtzW1FTvqspWheGPKAnn70uulQkfp6lUFGuByCaA+Tk4sQ0Q/YKrKHiphk/sfXTlyURXZUqOAfleVr8mk0wJgOknlyex8UyLoPG9QHT3CFgA+DScjfV0IkexU2Un1Xh9sHszqJz3sKunHG1pqw2TFfVnCDWCTgxgmKwVf1f9TNrlxauccxmxLJOKBRJBJatZ+tCHEGYiPzMsI7WkWGr85IAGkEuFzjhS7tC33c4kJqdgOeYOla5f6k7k4="
+    # AWS_SECRET_ACCESS_KEY
+    - secure: "AKsY869Rd8OzOTliHB/PALYRkjt/h0qftRoesY6m2cJYg07Pod1G2XEby7NFOZDJJ4S7VJIFgW5tM9PsU/8VGiewK4CuxbrtIsCXAm2+noJ7TG+yESICyUsWGNStUdAtjKPE21iV9wnY+1u7L6v1y+Kr8qI/+vHQsH/jKs5OzPAyroo7qdM33X34w2FRgyxUwWCOyKDku0X/TWZZPfRxWKjBq435mHjjnxcQoCCDVMcT/DKQf8jvGvQU5bS5owCEb7oFwxvVK8SFy+N1A/DeHvHywTuqzLh9DuYPkCtfN4ETOHbTZ07nDAu9/YJCaV2LwZtu6oJBlnyj/tsTOIptCKXAOiDS+q8tgIG0KMPcEXmRqoPEI4YnHwZmyf/yw0m13X+EduNQn3J/BzLFPqUimrAccKpwdEKNY13btZGx4d9EcaHAungfEV0xmMBHvF5hY4gzeCuZ0GXuPzhHEVSWPsIFVGvRszM+4j6fuumdQ+cnh4JSWIfSs8cREm0kOYRw4GcFP82DiktGkRtJ9lFThnqTuy+qht8Xx5pCAetIc7EyfZ4Sqp7DMI7VH+QEJPcQPxpq1VGJDF7KboYIZcsaqf3AFaPnlvEAIsm7855XVWfbwmc1E7II8/+wR5N5kltGXxK0jejtzpXrOIYkEdij63IVopY7Ogg7xIj6zOPDIFE="
+
+script:
+  - ./script/test
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: ./script/deploy
+    on:
+branch: first_commit
