@@ -18,3 +18,5 @@ Sample CI/CD pipeline for a serverless infrastructure in AWS.
 ## Notice
 Botocore will issue lots of DeprecationWarnings when using python 3.7, it's not Sceptre's fault.
 A PR it's on its way to address the issue: https://github.com/boto/botocore/pull/1577
+Workaround:
+`sed -i 's/value.getchildren()/list(value)/' .venv/lib/python3.7/site-packages/botocore/parsers.py`
