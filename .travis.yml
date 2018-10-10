@@ -1,4 +1,9 @@
-language: generic
+language: python
+
+python:
+  - '3.6'
+
+install: true
 
 env:
   global:
@@ -15,4 +20,4 @@ deploy:
     skip_cleanup: true
     script: ./script/deploy
     on:
-      branch: first_commit
+branch: first_commit
