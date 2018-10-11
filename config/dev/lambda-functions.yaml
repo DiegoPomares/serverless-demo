@@ -2,15 +2,12 @@ template_path: templates/lambda_functions.py
 
 hooks:
   before_create:
-    - !s3_package helpers/customres^^{{ environment_config.s3_bucket_artifacts }}/cloudformation/customres.zip
     - !s3_package src/hello^^{{ environment_config.s3_bucket_artifacts }}/lambda/hello.zip
   before_update:
-    - !s3_package helpers/customres^^{{ environment_config.s3_bucket_artifacts }}/cloudformation/customres.zip
     - !s3_package src/hello^^{{ environment_config.s3_bucket_artifacts }}/lambda/hello.zip
 
 parameters:
   ArtifactsBucketName: !stack_output s3-bucket-artifacts::Name
-  CustomResKeyS3: cloudformation/customres.zip
 
   HelloKeyS3: lambda/hello.zip
   HelloObjectVersionS3: !s3_version {{ environment_config.s3_bucket_artifacts }}/lambda/hello.zip
