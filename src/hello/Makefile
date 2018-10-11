@@ -46,4 +46,4 @@ endif
 
 .PHONY: pytest
 pytest:
-	$(PYTHON) ../../tools/run_pytest.py $(ARGS)
+	$(PYTHON) ../../helpers/run_pytest.py $(ARGS)
