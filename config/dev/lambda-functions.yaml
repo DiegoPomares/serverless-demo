@@ -12,3 +12,6 @@ parameters:
 
   HelloKeyS3: lambda/hello.zip
   HelloObjectVersionS3: !s3_version {{ environment_config.s3_bucket_artifacts }}/lambda/hello.zip
+
+sceptre_user_data:
+  LambdaFunctionNames: ["Hello"]

@@ -1,13 +1,17 @@
+import os
+
 from troposphere import Template, Parameter, Ref, Output, GetAtt, Join
 from troposphere.awslambda import Function, Code, Version
 from troposphere.iam import Role, Policy
 from troposphere.cloudformation import AWSCustomObject
 
-from consts import DEFAULTS
+CUSTOM_LAMBDA_VERSION_PATH = "../custom_resources/lambda_version.py"
 
 
-def sceptre_handler(_sceptre_user_data=None):
-    template = MainTemplate(DEFAULTS['LambdaNames'])
+def sceptre_handler(sceptre_user_data=None):
+    sceptre_user_data = sceptre_user_data or {}
+
+    template = MainTemplate(sceptre_user_data.get('LambdaFunctionNames', []))
     yaml = template.t.to_yaml()
     return yaml
 
@@ -18,6 +22,7 @@ class CustomLambdaVersion(AWSCustomObject):
     props = {
         'ServiceToken': (str, True),
         'FunctionName': (str, True),
+        'S3ObjectVersion': (str, True),
     }
 
 
@@ -55,8 +60,57 @@ class MainTemplate:
             ],
         ))
 
+        custom_lambda_version_role = self.t.add_resource(Role(
+            "CustomLambdaVersionRole",
+            AssumeRolePolicyDocument={
+                "Version": "2012-10-17",
+                "Statement": [{
+                    "Action": ["sts:AssumeRole"],
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": ["lambda.amazonaws.com"]
+                    }
+                }]
+            },
+            ManagedPolicyArns=[
+                Ref(lambda_iam_policy_arn),
+            ],
+            Policies=[Policy(
+                PolicyName="PublishLambdaVersion",
+                PolicyDocument={
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": ["lambda:PublishVersion"],
+                            "Resource": "*",
+                        },
+                    ]
+                })
+            ],
+        ))
+
+        self.custom_lambda_version_lambda = self.t.add_resource(Function(
+            f"CustomLambdaVersionLambda",
+            FunctionName="CustomLambdaVersionLambda",
+            Handler="index.handler",
+            Runtime="python3.6",
+            Role=GetAtt(custom_lambda_version_role, "Arn"),
+            Code=Code(
+                ZipFile=self.get_custom_lambda_version_code()
+            )
+        ))
+
         for l in lambda_names:
             self.add_lambda(l, artifacts_bucket_name, lambda_role)
+
+
+    def get_custom_lambda_version_code(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        code_path = os.path.join(script_path, CUSTOM_LAMBDA_VERSION_PATH)
+
+        with open(code_path) as f:
+            return f.read()
 
     def add_lambda(self, name, s3_bucket, role):
         s3_key = self.t.add_parameter(Parameter(
@@ -84,16 +138,17 @@ class MainTemplate:
             )
         ))
 
-        version = self.t.add_resource(Version(
-            f"{name}LambdaVersion",
-            FunctionName=Ref(function)
-        ))
-
-        # version = self.t.add_resource(CustomLambdaVersion(
+        # version = self.t.add_resource(Version(
         #     f"{name}LambdaVersion",
-        #     ServiceToken=
-        #     FunctionName=Ref(function),
+        #     FunctionName=Ref(function)
         # ))
+
+        version = self.t.add_resource(CustomLambdaVersion(
+            f"{name}LambdaVersion",
+            ServiceToken=GetAtt(self.custom_lambda_version_lambda, "Arn"),
+            FunctionName=Ref(function),
+            S3ObjectVersion=Ref(s3_version)
+        ))
 
         uri = Join('', [
                 'arn:aws:apigateway:',
