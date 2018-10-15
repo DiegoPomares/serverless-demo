@@ -1,9 +1,15 @@
 from troposphere import Template, Parameter, Ref, Output, GetAtt, Join
-from troposphere.awslambda import Function, Code
+from troposphere.awslambda import Function, Code, Version
 from troposphere.iam import Role, Policy
 from troposphere.cloudformation import AWSCustomObject
 
 from consts import DEFAULTS
+
+
+def sceptre_handler(_sceptre_user_data=None):
+    template = MainTemplate(DEFAULTS['LambdaNames'])
+    yaml = template.t.to_yaml()
+    return yaml
 
 
 class CustomLambdaVersion(AWSCustomObject):
@@ -26,6 +32,12 @@ class MainTemplate:
             Type="String"
         ))
 
+        lambda_iam_policy_arn = self.t.add_parameter(Parameter(
+            "LambdaIAMPolicyARN",
+            Description="ARN of the base IAM policy for Lambda functions",
+            Type="String"
+        ))
+
         lambda_role = self.t.add_resource(Role(
             "LambdaRole",
             AssumeRolePolicyDocument={
@@ -38,35 +50,8 @@ class MainTemplate:
                     }
                 }]
             },
-            Path="/",
-            Policies=[Policy(
-                PolicyName="CloudWatchLogs",
-                PolicyDocument={
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Action": ["iam:ListAccountAliases"],
-                            "Resource": "*",
-                        },
-                        {
-                            "Effect": "Allow",
-                            "Action": ["logs:CreateLogGroup"],
-                            "Resource": Join(
-                                ":",
-                                ["arn:aws:logs", Ref("AWS::Region"), Ref("AWS::AccountId"), "*"]
-                            ),
-                        },
-                        {
-                            "Effect": "Allow",
-                            "Action": ["logs:CreateLogStream", "logs:PutLogEvents"],
-                            "Resource": Join(
-                                ":",
-                                ["arn:aws:logs", Ref("AWS::Region"), Ref("AWS::AccountId"), "log-group", "/aws/lambda/*", "*"]
-                            ),
-                        }
-                    ]
-                })
+            ManagedPolicyArns=[
+                Ref(lambda_iam_policy_arn),
             ],
         ))
 
@@ -104,6 +89,12 @@ class MainTemplate:
             FunctionName=Ref(function)
         ))
 
+        # version = self.t.add_resource(CustomLambdaVersion(
+        #     f"{name}LambdaVersion",
+        #     ServiceToken=
+        #     FunctionName=Ref(function),
+        # ))
+
         uri = Join('', [
                 'arn:aws:apigateway:',
                 Ref('AWS::Region'),
@@ -122,13 +113,3 @@ class MainTemplate:
             Value=uri,
             Description=f"{name}LambdaURI"
         ))
-
-
-def sceptre_handler(_sceptre_user_data=None):
-    template = MainTemplate(DEFAULTS['LambdaNames'])
-    yaml = template.t.to_yaml()
-    return yaml
-
-
-if __name__ == '__main__':
-    print(sceptre_handler())

@@ -1,2 +1,4 @@
 project_code: serverless
 region: {{ var.region | default("eu-west-2") }}
+
+lambda_iam_policy: {{ var.lambda_iam_policy | default("LambdaCloudWatchLogging") }}

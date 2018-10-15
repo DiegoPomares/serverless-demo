@@ -10,6 +10,12 @@ from consts import DEFAULTS
 
 
 template = Template()
+
+
+def sceptre_handler(_sceptre_user_data=None):
+    return template.to_yaml()
+
+
 lambda_parameters = {}
 
 def ref_constructor(loader, node):
@@ -105,10 +111,3 @@ template.add_output(Output(
     ]),
     Description="API Gateway URL, 'latest' stage"
 ))
-
-def sceptre_handler(_sceptre_user_data=None):
-    return template.to_yaml()
-
-
-if __name__ == '__main__':
-    print(sceptre_handler())
