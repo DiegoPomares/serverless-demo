@@ -1,7 +1,7 @@
 import os
 
 from troposphere import Template, Parameter, Ref, Output, GetAtt, Join
-from troposphere.awslambda import Function, Code, Version
+from troposphere.awslambda import Function, Code
 from troposphere.iam import Role, Policy
 from troposphere.cloudformation import AWSCustomObject
 
@@ -137,11 +137,6 @@ class MainTemplate:
                 S3ObjectVersion=Ref(s3_version)
             )
         ))
-
-        # version = self.t.add_resource(Version(
-        #     f"{name}LambdaVersion",
-        #     FunctionName=Ref(function)
-        # ))
 
         version = self.t.add_resource(CustomLambdaVersion(
             f"{name}LambdaVersion",
