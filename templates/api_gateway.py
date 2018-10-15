@@ -20,19 +20,33 @@ def sceptre_handler(sceptre_user_data=None):
     return yaml
 
 
-class CustomLambdaVersion(AWSCustomObject):
-    resource_type = "Custom::LambdaVersion"
+class CustomAPIGWDeployment(AWSCustomObject):
+    resource_type = "Custom::APIGWDeployment"
 
     props = {
         'ServiceToken': (str, True),
-        'FunctionName': (str, True),
-        'S3ObjectVersion': (str, True),
+        'RestApiId': (str, True),
+        'StageName': (str, True),
+        'LambdaUris': ([str], True),
     }
 
 
 class MainTemplate:
     def __init__(self, lambda_names):
         self.t = Template()
+        self.lambda_uris = []
+
+        lambda_iam_policy_arn = self.t.add_parameter(Parameter(
+            "LambdaIAMPolicyARN",
+            Description="ARN of the base IAM policy for Lambda functions",
+            Type="String"
+        ))
+
+        apigw_stage_name = self.t.add_parameter(Parameter(
+            "APIGWStageName",
+            Description="Stage name for API Gateway deployment",
+            Type="String"
+        ))
 
         json_mapping_template = self.t.add_parameter(Parameter(
             "MappingTemplate",
@@ -41,7 +55,7 @@ class MainTemplate:
             Type="String"
         ))
 
-        for l in lambda_names:
+        for l in sorted(lambda_names):
             self.add_lambda_uri_parameters(l)
 
         apigw_role = self.t.add_resource(Role(
@@ -76,16 +90,61 @@ class MainTemplate:
             Body=self.get_swagger()
         ))
 
-        apigw_deployment = self.t.add_resource(Deployment(
-            "APIGWDeployment",
-            RestApiId=Ref(apigw)
+        custom_apigw_deployment_role = self.t.add_resource(Role(
+            "CustomAPIGWDeploymentRole",
+            AssumeRolePolicyDocument={
+                "Version": "2012-10-17",
+                "Statement": [{
+                    "Action": ["sts:AssumeRole"],
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": ["lambda.amazonaws.com"]
+                    }
+                }]
+            },
+            ManagedPolicyArns=[
+                Ref(lambda_iam_policy_arn),
+            ],
+            Policies=[Policy(
+                PolicyName="CreateDeployment",
+                PolicyDocument={
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": ["apigateway:POST"],
+                            "Resource": [
+                                Join('', [
+                                    "arn:aws:apigateway:",
+                                    Ref('AWS::Region'),
+                                    "::/restapis/",
+                                    Ref(apigw),
+                                    "/deployments",
+                                ]),
+                            ],
+                        },
+                    ]
+                })
+            ],
         ))
 
-        apigw_stage_latest = self.t.add_resource(Stage(
-            "APIGWStage",
-            StageName='latest',
+        self.custom_apigw_deployment_lambda = self.t.add_resource(Function(
+            f"CustomAPIGWDeploymentLambda",
+            FunctionName="CustomAPIGWDeploymentLambda",
+            Handler="index.handler",
+            Runtime="python3.6",
+            Role=GetAtt(custom_apigw_deployment_role, "Arn"),
+            Code=Code(
+                ZipFile=self.get_custom_apigw_deployment_code()
+            )
+        ))
+
+        apigw_deployment = self.t.add_resource(CustomAPIGWDeployment(
+            "APIGWDeployment",
+            ServiceToken=GetAtt(self.custom_apigw_deployment_lambda, "Arn"),
             RestApiId=Ref(apigw),
-            DeploymentId=Ref(apigw_deployment)
+            StageName=Ref(apigw_stage_name),
+            LambdaUris=self.lambda_uris
         ))
 
         self.t.add_output(Output(
@@ -96,17 +155,18 @@ class MainTemplate:
                 '.execute-api.',
                 Ref('AWS::Region'),
                 '.amazonaws.com/',
-                Ref(apigw_stage_latest),
+                Ref(apigw_stage_name),
             ]),
-            Description="API Gateway URL, 'latest' stage"
+            Description="API Gateway stage's URL"
         ))
 
     def add_lambda_uri_parameters(self, name):
         parameter_name = f"{name}LambdaURI"
-        self.t.add_parameter(Parameter(
+        uri = self.t.add_parameter(Parameter(
             parameter_name,
             Type="String"
-    ))
+        ))
+        self.lambda_uris.append(Ref(uri))
 
     def get_swagger(self):
         script_path = os.path.dirname(os.path.realpath(__file__))

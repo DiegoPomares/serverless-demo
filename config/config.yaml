@@ -1,4 +1,5 @@
 project_code: serverless
 region: {{ var.region | default("eu-west-2") }}
 
+apigw_stage_name: {{ var.apigw_stage_name | default("latest") }}
 lambda_iam_policy: {{ var.lambda_iam_policy | default("LambdaCloudWatchLogging") }}

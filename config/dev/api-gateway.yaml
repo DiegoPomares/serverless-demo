@@ -1,6 +1,9 @@
 template_path: templates/api_gateway.py
 
 parameters:
+  APIGWStageName: {{ environment_config.apigw_stage_name }}
+  LambdaIAMPolicyARN: !stack_output common::LambdaIAMPolicyARN
+
   HelloLambdaURI: !stack_output lambda-functions::HelloLambdaURI
 
 sceptre_user_data:

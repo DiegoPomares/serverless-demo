@@ -9,15 +9,15 @@ def handler(event, context):
     pid = None
 
     try:
-        function_name = event['ResourceProperties']['FunctionName']
+        rest_api_id = event['ResourceProperties']['RestApiId']
+        stage_name = event['ResourceProperties']['StageName']
 
         if event['RequestType'] in ['Create', 'Update']:
-            version = create_version(function_name)
-            pid = f'{function_name}:{version}'
-            response['Version'] = version
+            deployment = create_deployment(rest_api_id, stage_name)
+            pid = deployment
 
         if event['RequestType'] == 'Delete':
-            # Do nothing, Lambda versions will be deleted when the Lambda function is deleted
+            # Do nothing, APIGW deployments will be deleted when the APIGW is deleted
             pass
 
     except Exception as err:
@@ -31,11 +31,12 @@ def handler(event, context):
         cfnresponse.send(event, context, status, response, pid)
 
 
-def create_version(function_name):
-    client = boto3.client('lambda')
+def create_deployment(rest_api_id, stage_name):
+    client = boto3.client('apigateway')
 
-    response = client.publish_version(
-        FunctionName=function_name
+    response = client.create_deployment(
+        restApiId=rest_api_id,
+        stageName=stage_name
     )
 
-    return response['Version']
+    return response['id']
