@@ -1,8 +1,18 @@
 from troposphere import Template, Parameter, Ref, Output, GetAtt, Join
-from troposphere.awslambda import Function, Code, Version
+from troposphere.awslambda import Function, Code
 from troposphere.iam import Role, Policy
+from troposphere.cloudformation import AWSCustomObject
 
 from consts import DEFAULTS
+
+
+class CustomLambdaVersion(AWSCustomObject):
+    resource_type = "Custom::LambdaVersion"
+
+    props = {
+        'ServiceToken': (str, True),
+        'FunctionName': (str, True),
+    }
 
 
 class MainTemplate:
