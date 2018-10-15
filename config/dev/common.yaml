@@ -5,7 +5,7 @@ hooks:
     # CloudFormation can't delete non-empty S3 buckets
     - !cmd echo "Removing versioned objects from S3 bucket {{ environment_config.s3_bucket_artifacts }}:"
     - !cmd >
-      aws s3api list-object-versions
+      .venv/bin/aws s3api list-object-versions
       --bucket {{ environment_config.s3_bucket_artifacts }}
       --query "[Versions[*].[Key,VersionId],DeleteMarkers[*].[Key,VersionId]]"
       --output text |

@@ -146,16 +146,16 @@ class MainTemplate:
         ))
 
         uri = Join('', [
-                'arn:aws:apigateway:',
-                Ref('AWS::Region'),
-                ':lambda:path/2015-03-31/functions/arn:aws:lambda:',
-                Ref('AWS::Region'),
-                ':',
-                Ref('AWS::AccountId'),
-                ':function:',
-                Ref(function),
-                '/invocations?Qualifier=',
-                GetAtt(version, "Version"),
+            'arn:aws:apigateway:',
+            Ref('AWS::Region'),
+            ':lambda:path/2015-03-31/functions/arn:aws:lambda:',
+            Ref('AWS::Region'),
+            ':',
+            Ref('AWS::AccountId'),
+            ':function:',
+            Ref(function),
+            '/invocations?Qualifier=',
+            GetAtt(version, "Version"),
         ])
 
         self.t.add_output(Output(
