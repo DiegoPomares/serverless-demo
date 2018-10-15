@@ -7,7 +7,11 @@ hooks:
     - !s3_package src/hello^^{{ environment_config.s3_bucket_artifacts }}/lambda/hello.zip
 
 parameters:
-  ArtifactsBucketName: !stack_output s3-bucket-artifacts::Name
+  ArtifactsBucketName: !stack_output common::BucketName
+  LambdaIAMPolicyARN: !stack_output common::LambdaIAMPolicyARN
 
   HelloKeyS3: lambda/hello.zip
   HelloObjectVersionS3: !s3_version {{ environment_config.s3_bucket_artifacts }}/lambda/hello.zip
+
+sceptre_user_data:
+  LambdaFunctionNames: ["Hello"]

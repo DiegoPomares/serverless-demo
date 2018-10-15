@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  ArtifactsBucketName:
+    Description: Name of the S3 bucket to store Lambda function artifacts
+    AllowedPattern: "[a-z0-9][a-z0-9.-]{2,62}"
+    Type: String
+
+  LambdaIAMPolicyName:
+    Description: Name of the base IAM policy for Lambda functions
+    AllowedPattern: "[a-zA-Z0-9_][a-zA-Z0-9_+=,.@-]{0,127}"
+    Type: String
+
+
+Resources:
+  ArtifactsBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref ArtifactsBucketName
+      VersioningConfiguration:
+        Status: Enabled
+
+  CloudWatchLogsForLambda:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: !Ref LambdaIAMPolicyName
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - iam:ListAccountAliases
+            Resource: '*'
+
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+            Resource: !Join
+              - ':'
+              - - arn:aws:logs
+                - '*'
+                - !Ref 'AWS::AccountId'
+                - '*'
+
+          - Effect: Allow
+            Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: !Join
+              - ':'
+              - - arn:aws:logs
+                - '*'
+                - !Ref 'AWS::AccountId'
+                - log-group
+                - /aws/lambda/*
+                - '*'
+
+
+Outputs:
+  BucketName:
+    Value: !Ref ArtifactsBucketName
+  LambdaIAMPolicyARN:
+    Value: !Ref CloudWatchLogsForLambda
