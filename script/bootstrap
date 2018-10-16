@@ -10,29 +10,23 @@ if [ "$CI" == "true" ] && [ -z "$AWS_ACCESS_KEY_ID" -o -z "$AWS_SECRET_ACCESS_KE
 	exit 1
 fi
 
-# Bootstrap only when necessary, otherwise activate the virtualenv
+# Bootstrap only when necessary
 if [ -f .bootstrapped -a "$1" != "--force" ]; then
-    . .venv/bin/activate
-
-else
-    # Install virtualenv
-    pip install --upgrade virtualenv
-
-    # Remove environments
-    rm -rf .venvpython .venv
-
-    # Setup test environment for Python lambdas
-    virtualenv --prompt "(${PWD##*/}-venvpython) " .venvpython
-    . .venvpython/bin/activate
-    pip install --upgrade pip setuptools wheel
-    pip install --requirement dependencies/test_requirements.txt
-
-    # Setup Sceptre environment
-    virtualenv --prompt "(${PWD##*/}-venv) " .venv
-    . .venv/bin/activate
-    pip install --upgrade pip setuptools wheel
-    pip install --requirement dependencies/requirements.txt
-
-    touch .bootstrapped
-
+    exit 0
 fi
+
+# Remove environments
+rm -rf .venvpython .venv
+
+# Setup Sceptre environment
+python -m venv  --prompt "(${PWD##*/}-venv) " .venv
+.venv/bin/pip install --upgrade pip setuptools wheel
+.venv/bin/pip install --requirement dependencies/requirements.txt
+
+# Setup test environment for Python lambdas
+python -m venv --prompt "(${PWD##*/}-venvpython) " .venvpython
+.venvpython/bin/pip install --upgrade pip setuptools wheel
+.venvpython/bin/pip install --requirement dependencies/test_requirements.txt
+
+touch .bootstrapped
+
