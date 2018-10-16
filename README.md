@@ -9,6 +9,10 @@ Sample CI/CD pipeline for a serverless infrastructure in AWS.
 3. Deploy with `$ script/deploy`
 4. Remove CloudFormation stacks with `$ script/destroy`
 
+You can use the environment variables `AWS_PROFILE, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY` to setup credentials while deploying or removing the CloudFormation stacks:
+
+`$ AWS_PROFILE=dev_account script/deploy`
+
 ## Repo structure
 ### Sceptre/CloudFormation
 - **`config/`**: Sceptre configuration files for environments (all the config.yml files) and CloudFormation stacks (the rest of the YAMLs).
