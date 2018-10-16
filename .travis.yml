@@ -20,4 +20,4 @@ deploy:
     skip_cleanup: true
     script: ./script/deploy
     on:
-branch: first_commit
+      branch: master

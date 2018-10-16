@@ -1,6 +1,12 @@
 #!/bin/bash
 
 ENVIRONMENT=${1:-dev}
+OPTIONS=${@:2}
+
+if [ "$1" = "-h" ]; then
+    echo "Usage: $0 [SCEPTRE_ENVIRONMENT] [SCEPTRE_OPTIONS]"
+    exit 0
+fi
 
 set -e
 
@@ -10,4 +16,5 @@ cd "$(dirname "$(readlink -f "$0")")/.."
 ./script/bootstrap
 PY_DIR=".venv/bin"
 
-${PY_DIR}/sceptre delete-env "$ENVIRONMENT"
+${PY_DIR}/sceptre $OPTIONS delete-env $ENVIRONMENT
+${PY_DIR}/sceptre describe-env $ENVIRONMENT

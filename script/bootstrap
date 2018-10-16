@@ -15,19 +15,22 @@ if [ -f .bootstrapped -a "$1" != "--force" ]; then
     . .venv/bin/activate
 
 else
+    # Install virtualenv
+    pip install --upgrade virtualenv
+
     # Remove environments
     rm -rf .venvpython .venv
 
     # Setup test environment for Python lambdas
     virtualenv --prompt "(${PWD##*/}-venvpython) " .venvpython
     . .venvpython/bin/activate
-    pip install --upgrade pip setuptools wheel virtualenv
+    pip install --upgrade pip setuptools wheel
     pip install --requirement dependencies/test_requirements.txt
 
     # Setup Sceptre environment
     virtualenv --prompt "(${PWD##*/}-venv) " .venv
     . .venv/bin/activate
-    pip install --upgrade pip setuptools wheel virtualenv
+    pip install --upgrade pip setuptools wheel
     pip install --requirement dependencies/requirements.txt
 
     touch .bootstrapped
