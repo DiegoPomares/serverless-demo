@@ -25,7 +25,12 @@ Sample CI/CD pipeline for a serverless infrastructure in AWS.
 - **`helpers/`**: Helper scripts and config files.
 
 ## Notice
-Botocore will issue lots of DeprecationWarnings when using python 3.7, it's not Sceptre's fault.
-A PR it's on its way to address the issue: https://github.com/boto/botocore/pull/1577
-Workaround:
-`sed -i 's/value.getchildren()/list(value)/' .venv/lib/python3.7/site-packages/botocore/parsers.py`
+Some annoying DeprecationWarnings will pop up when using Python 3.7, the following PRs were submitted to address these issues:
+- Botocore: https://github.com/boto/botocore/pull/1577
+- PyYAML: https://github.com/yaml/pyyaml/pull/220
+
+Until they are merged and released, you can use the following workaround (after the virtual environments have been bootstraped) to mute the warnings:
+```bash
+sed -i 's/value.getchildren()/list(value)/' .venv/lib/python3.7/site-packages/botocore/parsers.py
+sed -i 's/collections/collections.abc/' .venv/lib/python3.7/site-packages/yaml/constructor.py
+```
