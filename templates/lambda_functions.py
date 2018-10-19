@@ -154,8 +154,9 @@ class MainTemplate:
             Ref('AWS::AccountId'),
             ':function:',
             Ref(function),
-            '/invocations?Qualifier=',
+            ':',
             GetAtt(version, "Version"),
+            '/invocations',
         ])
 
         self.t.add_output(Output(
