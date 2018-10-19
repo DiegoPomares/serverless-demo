@@ -1,4 +1,4 @@
-awscli==1.16.33
+awscli==1.16.37
 sceptre==1.4.2
 troposphere==2.3.3
 PyYAML==3.13
