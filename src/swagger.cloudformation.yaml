@@ -1,55 +1,45 @@
-swagger: '2.0'
+openapi: 3.0.1
 
 info:
   title: ServerlessDemo
   description: Dummy API that uses Lambdas as backends
-  version: '1.0.0'
-
-basePath: /v1
-schemes:
-  - https
-produces:
-  - application/json
-
-definitions:
-  Greeting:
-    type: string
+  version: 1.0.0
 
 paths:
   /hello:
     get:
-      summary: Say hello
+      description: Say hello
 
       parameters:
       - name: name
         description: Whom to greet
-        in: query
         required: false
-        type: string
+        in: query
+        schema:
+          type: string
 
       responses:
-        '200':
-          description: Greet someone
-          schema:
-            $ref: '#/definitions/Greeting'
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Greeting"
 
       x-amazon-apigateway-integration:
-        type: aws
-        responses:
-          default:
-            statusCode: '200'
-
-        httpMethod: POST
-        credentials: !GetAtt APIGWRole.Arn
-        passthroughBehavior: never
-        requestTemplates:
-          application/json: !Ref MappingTemplate
-
+        type: aws_proxy
         uri: !Ref HelloLambdaURI
+        credentials: !GetAtt APIGWRole.Arn
+        httpMethod: POST
+        contentHandling: CONVERT_TO_TEXT
+
+components:
+  schemas:
+    Greeting:
+      type: string
 
 x-amazon-apigateway-request-validators:
   parameters:
     validateRequestParameters: true
     validateRequestBody: false
 x-amazon-apigateway-request-validator: parameters
-
